@@ -1,0 +1,50 @@
+/* Light grey and bright blue theme */
+body {
+  background-color: #f5f5f5;
+  color: #2c3e50;
+  margin: 0;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  min-height: 100vh;
+  padding-top: 20px;
+}
+
+h1 {
+  color: #2c3e50;
+}
+
+input[type="text"], textarea {
+  border: 1px solid #3498db;
+  padding: 10px;
+  margin: 10px 0;
+  width: 50%;
+}
+
+input[type="text"] {
+  height: 40px;
+}
+
+textarea {
+  height: 50vh;
+  resize: vertical;
+}
+
+button {
+  border: 1px solid #3498db;
+  background-color: #3498db;
+  color: #ffffff;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 10px;
+  align-self: flex-end;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
