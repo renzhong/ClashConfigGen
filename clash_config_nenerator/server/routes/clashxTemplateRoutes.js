@@ -3,27 +3,37 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const yaml = require('js-yaml');
+const mysql = require('mysql2/promise');
+const config = require('config');
 const router = express.Router();
 
 // 路径到数据和模板文件夹
-const DATA_DIR = path.join(__dirname, '../data');
-const TEMPLATE_DIR = path.join(__dirname, '../template');
+const LOCAL_CLASH_DIR = config.get('local_clash_dir');
+const TEMPLATE_DIR = config.get('template_dir');
+const dbConfig = config.get('db');
 
 router.get('/:id', async (req, res) => {
     const requestedId = req.params.id;
 
     try {
-        const filePath = path.join(DATA_DIR, 'config.json');
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        const configData = JSON.parse(fileContent);
-        if (configData.id !== requestedId) {
+        // 建立数据库连接
+        const connection = await mysql.createConnection(dbConfig);
+
+        // 从数据库中检索配置
+        const [rows, fields] = await connection.execute('SELECT * FROM clash_configs WHERE uuid = ?', [requestedId]);
+
+        if (rows.length === 0) {
             res.status(404).send('Config not found');
             return;
         }
 
+        // 从数据库中获取config和template信息
+        const configData = rows[0].config_json; // Assuming column name is 'config_json'
+        const templatePath = rows[0].template_path; // Assuming column name is 'template_path'
+
         // 读取并解析模板文件
-        const templateYaml = yaml.load(fs.readFileSync(path.join(TEMPLATE_DIR, configData.template), 'utf8'));
-        // 用于存储合并后的代理列表
+        const templateYaml = yaml.load(fs.readFileSync(path.join(TEMPLATE_DIR, templatePath), 'utf8'));
+
         let allProxies = templateYaml.proxies || [];
 
         templateYaml['proxy-groups'].forEach(group => {
@@ -48,7 +58,7 @@ router.get('/:id', async (req, res) => {
             } else if (source.file) {
                 // 从本地文件加载配置
                 try {
-                    sourceConfigYaml = yaml.load(fs.readFileSync(path.join(DATA_DIR, source.file), 'utf8'));
+                    sourceConfigYaml = yaml.load(fs.readFileSync(path.join(LOCAL_CLASH_DIR, source.file), 'utf8'));
                 } catch (error) {
                     console.error(`Error reading file for ${name}:`, error);
                     continue; // 跳过这个源，继续下一个
@@ -63,19 +73,15 @@ router.get('/:id', async (req, res) => {
             // 更新proxy-groups
             source.group.forEach(groupName => {
                 const group = templateYaml['proxy-groups'].find(g => g.name === groupName);
-                console.info(`groupName 1 ${groupName}`);
                 if (group) {
-                    console.info(`groupName 2 ${group.proxies}`);
                     if (!Array.isArray(group.proxies)) {
                         group.proxies = [];
                     }
-                    console.info(`groupName 3 ${group.proxies}`);
                     sourceConfigYaml.proxies.forEach(proxy => {
                         if (!group.proxies.includes(proxy.name)) {
                             group.proxies.push(proxy.name);
                         }
                     });
-                    console.info(`groupName 4 ${group.proxies}`);
                 }
             });
         }
