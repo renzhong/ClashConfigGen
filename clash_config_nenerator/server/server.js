@@ -4,6 +4,7 @@ const cors = require('cors');
 const configRoutes = require('./routes/configRoutes');
 const clashxRoutes = require('./routes/clashxRoutes');
 const clashxTemplateRoutes = require('./routes/clashxTemplateRoutes');
+const pageArchRoutes = require('./routes/pageArch');
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 app.use('/api', configRoutes);
 app.use('/clashx', clashxRoutes);
 app.use('/clashxt', clashxTemplateRoutes);
+app.use('/page', pageArchRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
