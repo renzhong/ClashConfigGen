@@ -1,0 +1,63 @@
+/* 文件：src/assets/ClashPageStyle.css */
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.left-panel, .right-panel {
+  flex: 1;
+  padding: 20px;
+  border: 1px solid #ccc;
+  margin: 10px;
+  height: calc(100% - 20px);
+  overflow-y: auto;
+}
+
+.left-panel, .right-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel-content {
+  width: 90%; /* 占据面板宽度的90% */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h2 {
+  color: #2d3436;
+  margin-bottom: 20px;
+}
+
+input[type="text"], textarea, select {
+  border: 1px solid #b2bec3;
+  padding: 10px;
+  margin: 10px 0;
+  width: 100%; /* 输入框和选择框占据全部宽度 */
+}
+
+input[type="text"] {
+  height: 40px;
+}
+
+textarea {
+  height: 300px;
+  resize: vertical;
+}
+
+button {
+  border: 1px solid #636e72;
+  background-color: #636e72;
+  color: #ffffff;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+}
+
+button:hover {
+  background-color: #2d3436;
+}

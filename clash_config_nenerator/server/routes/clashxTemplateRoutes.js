@@ -40,27 +40,23 @@ router.get('/:id', async (req, res) => {
             console.info(`template ${group.name}`);
         });
 
-        for (const [name, source] of Object.entries(configData.urls)) {
+        for (const item of configData) {
             let sourceConfigYaml;
-            if (source.url) {
+            if (item.url) {
                 // 通过HTTP请求获取远程配置
                 try {
-                    const headersConfig = {
-                        'User-Agent': 'curl/7.81.0',
-                        'Accept': '*/*'
-                    };
-                    const response = await axios.get(source.url);
+                    const response = await axios.get(item.url);
                     sourceConfigYaml = yaml.load(response.data);
                 } catch (error) {
-                    console.error(`Error fetching remote config for ${name}:`, error);
+                    console.error(`Error fetching remote config from URL: ${item.url}`, error);
                     continue; // 跳过这个源，继续下一个
                 }
-            } else if (source.file) {
+            } else if (item.file) {
                 // 从本地文件加载配置
                 try {
-                    sourceConfigYaml = yaml.load(fs.readFileSync(path.join(LOCAL_CLASH_DIR, source.file), 'utf8'));
+                    sourceConfigYaml = yaml.load(fs.readFileSync(path.join(LOCAL_CLASH_DIR, item.file), 'utf8'));
                 } catch (error) {
-                    console.error(`Error reading file for ${name}:`, error);
+                    console.error(`Error reading file: ${item.file}`, error);
                     continue; // 跳过这个源，继续下一个
                 }
             }
@@ -71,7 +67,7 @@ router.get('/:id', async (req, res) => {
             }
 
             // 更新proxy-groups
-            source.group.forEach(groupName => {
+            item.selectedGroup.forEach(groupName => {
                 const group = templateYaml['proxy-groups'].find(g => g.name === groupName);
                 if (group) {
                     if (!Array.isArray(group.proxies)) {
@@ -88,6 +84,19 @@ router.get('/:id', async (req, res) => {
 
         // 更新templateYaml的proxies部分
         templateYaml.proxies = allProxies;
+
+        // 查找名为“🪴GPT自动选择”的proxy-group
+        const gptAutoSelectGroup = templateYaml['proxy-groups'].find(group => group.name === "🪴GPT自动选择");
+
+        if (gptAutoSelectGroup && Array.isArray(gptAutoSelectGroup.proxies)) {
+            // 找出所有不包含"香港"的代理服务器名称
+            const validProxies = templateYaml.proxies
+                .filter(proxy => !proxy.server.includes("hk"))
+                .map(proxy => proxy.name);
+
+            // 过滤出“🪴GPT自动选择”组中的有效代理
+            gptAutoSelectGroup.proxies = gptAutoSelectGroup.proxies.filter(proxyName => validProxies.includes(proxyName));
+        }
 
         // 将最终结果转换为YAML格式并发送
         res.type('text/plain');
