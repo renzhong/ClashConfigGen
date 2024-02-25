@@ -47,7 +47,7 @@
 
 <script>
 import axios from 'axios'; // 确保已经安装了 axios
-const API_BASE_URL = "http://localhost:3000/page";
+const API_BASE_URL = "https://www.autumnvioce.cn/page";
 
 export default {
   data() {
