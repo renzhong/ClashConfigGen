@@ -1,0 +1,12 @@
+{
+    "db": {
+        "host": "${{ secrets.DB_HOST }}",
+        "port": "3306",
+        "user": "${{ secrets.DB_USER }}",
+        "password": "${{ secrets.DB_PASSWORD }}",
+        "database": "${{ secrets.DB_DATABASE }}"
+    },
+    "template_dir": "/mnt/template",
+    "local_clash_dir": "/mnt/local_clash_dir",
+    "base_subscribe_url": "${{ secrets.BASE_SUBSCRIBE_URL }}"
+}
